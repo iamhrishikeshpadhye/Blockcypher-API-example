@@ -1,0 +1,6 @@
+function address_list (network, xpub, chain, start, end) - derive list of addresses from start to end xpub for btc test network
+function add_wallet (network, name, addresses) - add address list to block cipher and assign it a name
+function add_addresses (network, name, addresses),
+function fetch_wallet (network, name),
+function utxo_for_coinselect( utxolist),
+function fetch_utxo (network, receive_wallet, change_wallet ),
