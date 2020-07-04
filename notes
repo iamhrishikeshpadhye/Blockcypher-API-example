@@ -4,3 +4,11 @@ function add_addresses (network, name, addresses),
 function fetch_wallet (network, name),
 function utxo_for_coinselect( utxolist),
 function fetch_utxo (network, receive_wallet, change_wallet ),
+
+
+after that you have to create a function for generating unsigned transaction, 
+this function will accept list of utxos, recipient address and amount. You may 
+use this https://github.com/bitcoinjs/coinselect for selecting inputs for unsigned 
+transaction, and output for unsigned transaction will be taken from recipient address(and amount)
+
+refer this for creating unsigned transaction https://github.com/bitcoinjs/bitcoinjs-lib/issues/1011#issuecomment-368397505
