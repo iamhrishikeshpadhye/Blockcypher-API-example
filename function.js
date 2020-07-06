@@ -90,16 +90,13 @@ function add_addresses (network, name, addresses){
 function fetch_wallet (network, name){
 
 	var url = `https://api.blockcypher.com/v1/btc/test3/wallets/${name}?token=${token}`
-
 	request(url, function(err, httpResponse, body) {
 		if (err) {
 			console.error('Request failed:', err);
 		} else {
 			console.log('request results:', body);
-			
 		}
 	});
-      
 }
 
 function utxo_for_coinselect( utxolist){
@@ -127,36 +124,26 @@ function fetch_utxo (network, receive_wallet, change_wallet ){
 	var url_change = `https://api.blockcypher.com/v1/btc/test3/addrs/${change_wallet}?token=${token}&unspentOnly=true`;
 	var json_receive;
 	var json_change;
-
 	request(url_receive, function (error, response, body) {
 		if (!error && response.statusCode == 200) {
 			json_receive = JSON.parse(body);
 		}
-
 		else {
 			console.log("Unable to find any receive wallet unspent transaction outputs.");
 			if (error) console.log("ERROR:", error);
 		}
-
 		utxos = utxo_for_coinselect(json_receive["txrefs"]);
-
 		targets = [
 		{
 			address: 'mgh7YLxsBdx62LZFNJtLyusBu5BFUJ13xf',
     		value: 1800000
 		},
-
 		{
 			address: 'mztA9mzFRJFdA6eQDBEh9Myh1uj2pdoUG5',
     		value: 5000
 		}
-
 		]
-
 		let { inputs, outputs, fee } = coinselect(utxos, targets, fee_rate);
-
-
-
 		console.log(inputs);
 		console.log(outputs);
 		//var script_public_key = bitcoin.address.toOutputScript(address, network);
@@ -166,43 +153,28 @@ function fetch_utxo (network, receive_wallet, change_wallet ){
 		//var unsigned_tx = txb.buildIncomplete();
 		//unsigned_tx.ins[0].script = Buffer.from(script_public_key, 'hex');
 		//console.log(unsigned_tx.toHex());
-
-
 		// console.log(json_receive.txrefs.length);
 		// for (var i = 0; i < json_receive.txrefs.length; i++ ){
 		// 	console.log(json_receive["txrefs"][i]["address"]);
-
 		// }
-
 	});
-
-	
-
 	request(url_change, function (error, response, body) {
 		if (!error && response.statusCode == 200) {
 			json_change = JSON.parse(body);
 		}
-
 		else {
 			console.log("Unable to find any change wallet unspent transaction outputs.");
 			if (error) console.log("ERROR:", error);
 		}
-
 		//console.log(json_change.txrefs.length);
-
 		// if(!(json_change["txrefs"] == undefined)){
-
 		// 	console.log("txrefs not found in change wallet");
 		// }
 		// else{
 		// 	console.log(json_change["txrefs"]);
 		// }
-
 	});
-
 }
-
-
 
 
 function broadcast_tx (tx) {
@@ -230,7 +202,29 @@ function broadcast_tx (tx) {
 let receive_list = address_list(network, account_xpub, parseInt(receive_index, 16), 0, 20);
 let change_list = address_list(network, account_xpub, parseInt(change_index, 16), 0, 20);
 
-fetch_utxo(network, "vipulReceive", "vipulChange");
+
+function buildTransaction(inputs, outputs) {
+
+	if (!inputs || !outputs) return
+    var txBuilder = new bitcoin.TransactionBuilder(network)
+    for(var i = 0; i < inputs.length; i++){
+        var input = inputs[i]
+        txBuilder.addInput(input.txid, input.vout, 0xffffffff, Buffer.from(input.scriptPubKey, 'hex'))
+    }
+
+    for(var i = 0; i < outputs.length; i++){
+        var output = outputs[i]
+        txBuilder.addOutput(output.address, output.amount)
+    }
+    var tx = txBuilder.buildIncomplete()
+    for(var i = 0; i < inputs.length; i++){
+        var input = inputs[i]
+        tx.ins[i].script = Buffer.from(input.scriptPubKey, 'hex')
+    }
+    return tx.toHex()
+}
+
+//fetch_utxo(network, "vipulReceive", "vipulChange");
 
 //add_addresses (network, "vipulReceive", receive_list);
 
@@ -238,3 +232,4 @@ fetch_utxo(network, "vipulReceive", "vipulChange");
 //add_wallet (network, "vipulChange", change_list);
 
 //fetch_wallet (network, "vipulReceive");
+// Function used to build a new unsigned transaction
